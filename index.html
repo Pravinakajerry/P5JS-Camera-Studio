@@ -223,14 +223,7 @@ for (let i = 0; i < pixels.length; i += 4) {
     </div>
 
     <script>
-        let currentFilter = null;
-        let sharedCapture = null;
-        let captureReady = false;
-        let previewSketches = {};
-        
-        // Initialize filters from localStorage or defaults
-        let filters = JSON.parse(localStorage.getItem('filters')) || defaultFilters;
-
+   
         // Create main sketch that will handle camera initialization
         const mainSketch = new p5(function(p) {
             p.setup = function() {

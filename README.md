@@ -1,6 +1,5 @@
 # P5.js Camera Filter Development Guide
 
-## Check out demo video:
 [![Watch the video](https://img.youtube.com/vi/bDqbez7nRkA/0.jpg)](https://www.youtube.com/watch?v=bDqbez7nRkA)
 
 ## Table of Contents

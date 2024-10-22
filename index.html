@@ -435,6 +435,17 @@ for (let i = 0; i < pixels.length; i += 4) {
 }`
             }
         ];
+
+// Then, initialize variables
+let currentFilter = null;
+let sharedCapture = null;
+let captureReady = false;
+let previewSketches = {};
+
+// Now initialize filters from localStorage or defaults
+let filters = JSON.parse(localStorage.getItem('filters')) || defaultFilters;
+
+        
     </script>
 </body>
 </html>

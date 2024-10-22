@@ -2,7 +2,8 @@
 
 [![Watch the video](https://img.youtube.com/vi/bDqbez7nRkA/0.jpg)](https://www.youtube.com/watch?v=bDqbez7nRkA)
 
- ^ Demo Video
+ ^ Demo Video: [Watch the video on YouTube](https://www.youtube.com/watch?v=bDqbez7nRkA)
+
 
 ## Table of Contents
 1. [Fundamentals](#fundamentals)

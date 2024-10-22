@@ -191,10 +191,81 @@
         .edit-button:hover {
             color: #000;
         }
+        #capture-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+}
+
+#capture-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #000;
+    border: 3px solid white;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+#capture-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+.captured-preview {
+    width: 60px;
+    height: 45px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+}
+
+.captured-preview:hover {
+    transform: scale(1.1);
+}
+
+.captured-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#capture-bar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+}        
     </style>
 </head>
 <body>
-    <div id="camera-view"></div>
+    <div id="camera-view">
+            <div id="capture-bar">
+        <button id="capture-button"></button>
+        <div class="captured-preview">
+            <img id="last-capture" />
+        </div>
+    </div>
+    </div>
+
     <div id="filters-panel">
         <div id="filters-list"></div>
         <button id="add-filter">Add New Filter</button>
@@ -215,6 +286,7 @@ for (let i = 0; i < pixels.length; i += 4) {
     pixels[i + 1] = pixels[i + 1];   // Keep green
     pixels[i + 2] = 255 - pixels[i + 2]; // Invert blue
 }</textarea>
+            
             <div class="modal-buttons">
                 <button class="cancel" onclick="closeModal()">Cancel</button>
                 <button class="save" onclick="saveFilter()">Save Filter</button>
@@ -224,37 +296,71 @@ for (let i = 0; i < pixels.length; i += 4) {
 
     <script>
    
-        // Create main sketch that will handle camera initialization
-        const mainSketch = new p5(function(p) {
-            p.setup = function() {
-                let canvas = p.createCanvas(640, 480);
-                canvas.parent('camera-view');
-                p.pixelDensity(1);
-                
-                // Initialize camera here
-                sharedCapture = p.createCapture(p.VIDEO, function() {
-                    sharedCapture.hide();
-                    captureReady = true;
-                    // Once camera is ready, create preview sketches
-                    renderFilters();
-                });
-            };
+       const mainSketch = new p5(function(p) {
+    let canvas;
+    
+    p.setup = function() {
+        canvas = p.createCanvas(640, 480);
+        canvas.parent('camera-view');
+        p.pixelDensity(1);
+        
+        // Initialize camera here
+        sharedCapture = p.createCapture(p.VIDEO, function() {
+            sharedCapture.hide();
+            captureReady = true;
+            renderFilters();
+        });
 
-            p.draw = function() {
-                if (!captureReady) return;
-                
-                p.image(sharedCapture, 0, 0, p.width, p.height);
-                if (currentFilter) {
-                    p.loadPixels();
-                    try {
-                        new Function('pixels', 'width', 'height', currentFilter.code)(p.pixels, p.width, p.height);
-                        p.updatePixels();
-                    } catch (e) {
-                        console.error('Filter error:', e);
-                    }
-                }
-            };
-        }, 'camera-view');
+        // Setup capture button
+        const captureButton = document.getElementById('capture-button');
+        captureButton.addEventListener('click', takeSnapshot);
+    };
+
+    p.draw = function() {
+        if (!captureReady) return;
+        
+        p.image(sharedCapture, 0, 0, p.width, p.height);
+        if (currentFilter) {
+            p.loadPixels();
+            try {
+                new Function('pixels', 'width', 'height', currentFilter.code)(p.pixels, p.width, p.height);
+                p.updatePixels();
+            } catch (e) {
+                console.error('Filter error:', e);
+            }
+        }
+    };
+
+    function takeSnapshot() {
+        if (!captureReady) return;
+
+        // Create animation effect
+        const button = document.getElementById('capture-button');
+        button.style.transform = 'scale(0.9)';
+        setTimeout(() => button.style.transform = '', 150);
+
+        // Get canvas data
+        const dataUrl = canvas.elt.toDataURL('image/png');
+        
+        // Update preview
+        const preview = document.querySelector('.captured-preview');
+        const previewImg = document.getElementById('last-capture');
+        previewImg.src = dataUrl;
+        preview.style.display = 'block';
+
+        // Set up preview click to download
+        preview.onclick = () => {
+            const link = document.createElement('a');
+            link.download = `filter-${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+        };
+
+        // Optional: Add capture sound effect
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+        audio.play();
+    }
+}, 'camera-view');
 
         // Create preview sketch for a filter
         function createPreviewSketch(filter, container) {

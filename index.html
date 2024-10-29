@@ -40,17 +40,27 @@
 
         #filters-list {
             flex-grow: 1;
-            overflow-y: scroll;
+            overflow-y: auto;
             margin-bottom: 80px; /* Space for Add Filter button */
+            padding-right: 10px; /* Add padding for scrollbar */
             
-            /* Hide scrollbar for Chrome, Safari and Opera */
-            &::-webkit-scrollbar {
-                display: none;
-            }
-            
-            /* Hide scrollbar for IE, Edge and Firefox */
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            /* Custom scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: #d8d8d8 #f1f1f1;
+        }
+
+        #filters-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #filters-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        #filters-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
         }
 
         .filter-card {
@@ -115,7 +125,6 @@
             background: #333;
         }
 
-        /* Previous modal styles remain the same */
         .modal {
             display: none;
             position: fixed;
@@ -160,7 +169,12 @@
         .modal-buttons {
             display: flex;
             gap: 8px;
-            justify-content: flex-end;
+            justify-content: space-between;
+        }
+
+        .modal-buttons .right-buttons {
+            display: flex;
+            gap: 8px;
         }
 
         .modal button {
@@ -168,6 +182,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .modal button.save {
@@ -175,95 +190,104 @@
             color: white;
         }
 
+        .modal button.save:hover {
+            background: #333;
+        }
+
         .modal button.cancel {
             background: #eee;
         }
 
+        .modal button.cancel:hover {
+            background: #ddd;
+        }
+
+        .modal button.delete {
+            background: #ff4444;
+            color: white;
+        }
+
+        .modal button.delete:hover {
+            background: #ff6666;
+        }
+
         .edit-button {
             font-size: 12px;
-            color: #666;
-            background: none;
+            color: white;
+            background: #000;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
-            margin-top: 4px;
+            padding: 8px;
+            margin-top: 8px;
+            transition: all 0.2s;
         }
 
         .edit-button:hover {
-            color: #000;
+            background: #333;
         }
+
         #capture-bar {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 12px 20px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    backdrop-filter: blur(8px);
-    z-index: 100;
-}
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
 
-#capture-button {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #000;
-    border: 3px solid white;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding: 0;
-}
+        #capture-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #000;
+            border: 3px solid white;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+        }
 
-#capture-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-}
+        #capture-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
 
-.captured-preview {
-    width: 60px;
-    height: 45px;
-    border-radius: 6px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: none;
-}
+        .captured-preview {
+            width: 60px;
+            height: 45px;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
 
-.captured-preview:hover {
-    transform: scale(1.1);
-}
+        .captured-preview:hover {
+            transform: scale(1.1);
+        }
 
-.captured-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-#capture-bar::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 16px;
-    height: 16px;
-    background: white;
-    border-radius: 50%;
-}        
+        .captured-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
     <div id="camera-view">
-            <div id="capture-bar">
-        <button id="capture-button"></button>
-        <div class="captured-preview">
-            <img id="last-capture" />
+        <div id="capture-bar">
+            <button id="capture-button"></button>
+            <div class="captured-preview">
+                <img id="last-capture" />
+            </div>
         </div>
-    </div>
     </div>
 
     <div id="filters-panel">
@@ -271,7 +295,6 @@
         <button id="add-filter">Add New Filter</button>
     </div>
 
-    <!-- Previous modal HTML remains the same -->
     <div class="modal" id="filter-modal">
         <div class="modal-content">
             <h2>Add New Filter</h2>
@@ -288,81 +311,75 @@ for (let i = 0; i < pixels.length; i += 4) {
 }</textarea>
             
             <div class="modal-buttons">
-                <button class="cancel" onclick="closeModal()">Cancel</button>
-                <button class="save" onclick="saveFilter()">Save Filter</button>
+                <button class="delete" onclick="deleteFilter()">Delete Filter</button>
+                <div class="right-buttons">
+                    <button class="cancel" onclick="closeModal()">Cancel</button>
+                    <button class="save" onclick="saveFilter()">Save Filter</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-   
-       const mainSketch = new p5(function(p) {
-    let canvas;
-    
-    p.setup = function() {
-        canvas = p.createCanvas(640, 480);
-        canvas.parent('camera-view');
-        p.pixelDensity(1);
-        
-        // Initialize camera here
-        sharedCapture = p.createCapture(p.VIDEO, function() {
-            sharedCapture.hide();
-            captureReady = true;
-            renderFilters();
-        });
+        const mainSketch = new p5(function(p) {
+            let canvas;
+            
+            p.setup = function() {
+                canvas = p.createCanvas(640, 480);
+                canvas.parent('camera-view');
+                p.pixelDensity(1);
+                
+                sharedCapture = p.createCapture(p.VIDEO, function() {
+                    sharedCapture.hide();
+                    captureReady = true;
+                    renderFilters();
+                });
 
-        // Setup capture button
-        const captureButton = document.getElementById('capture-button');
-        captureButton.addEventListener('click', takeSnapshot);
-    };
+                const captureButton = document.getElementById('capture-button');
+                captureButton.addEventListener('click', takeSnapshot);
+            };
 
-    p.draw = function() {
-        if (!captureReady) return;
-        
-        p.image(sharedCapture, 0, 0, p.width, p.height);
-        if (currentFilter) {
-            p.loadPixels();
-            try {
-                new Function('pixels', 'width', 'height', currentFilter.code)(p.pixels, p.width, p.height);
-                p.updatePixels();
-            } catch (e) {
-                console.error('Filter error:', e);
+            p.draw = function() {
+                if (!captureReady) return;
+                
+                p.image(sharedCapture, 0, 0, p.width, p.height);
+                if (currentFilter) {
+                    p.loadPixels();
+                    try {
+                        new Function('pixels', 'width', 'height', currentFilter.code)(p.pixels, p.width, p.height);
+                        p.updatePixels();
+                    } catch (e) {
+                        console.error('Filter error:', e);
+                    }
+                }
+            };
+
+            function takeSnapshot() {
+                if (!captureReady) return;
+
+                const button = document.getElementById('capture-button');
+                button.style.transform = 'scale(0.9)';
+                setTimeout(() => button.style.transform = '', 150);
+
+                const dataUrl = canvas.elt.toDataURL('image/png');
+                
+                const preview = document.querySelector('.captured-preview');
+                const previewImg = document.getElementById('last-capture');
+                previewImg.src = dataUrl;
+                preview.style.display = 'block';
+
+                preview.onclick = () => {
+                    const link = document.createElement('a');
+                    link.download = `filter-${Date.now()}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                };
+
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+                audio.play();
             }
-        }
-    };
+        }, 'camera-view');
 
-    function takeSnapshot() {
-        if (!captureReady) return;
-
-        // Create animation effect
-        const button = document.getElementById('capture-button');
-        button.style.transform = 'scale(0.9)';
-        setTimeout(() => button.style.transform = '', 150);
-
-        // Get canvas data
-        const dataUrl = canvas.elt.toDataURL('image/png');
-        
-        // Update preview
-        const preview = document.querySelector('.captured-preview');
-        const previewImg = document.getElementById('last-capture');
-        previewImg.src = dataUrl;
-        preview.style.display = 'block';
-
-        // Set up preview click to download
-        preview.onclick = () => {
-            const link = document.createElement('a');
-            link.download = `filter-${Date.now()}.png`;
-            link.href = dataUrl;
-            link.click();
-        };
-
-        // Optional: Add capture sound effect
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-        audio.play();
-    }
-}, 'camera-view');
-
-        // Create preview sketch for a filter
         function createPreviewSketch(filter, container) {
             return new p5(function(p) {
                 p.setup = function() {
@@ -390,58 +407,53 @@ for (let i = 0; i < pixels.length; i += 4) {
             localStorage.setItem('filters', JSON.stringify(filters));
         }
 
-renderFilters() {
-    const list = document.getElementById('filters-list');
-    const scrollPosition = list.scrollTop; // Store current scroll position
-    
-    list.innerHTML = '';
-    
-    filters.forEach((filter, index) => {
-        const card = document.createElement('div');
-        card.className = `filter-card ${currentFilter === filter ? 'active' : ''}`;
-        card.innerHTML = `
-            <div class="filter-preview" id="preview-${index}"></div>
-            <div class="filter-name">${filter.name}</div>
-            <div class="filter-code">${filter.code.split('\n')[0]}...</div>
-            <button class="edit-button" onclick="editFilter(${index})">Edit</button>
-        `;
-        card.onclick = () => setCurrentFilter(filter);
-        list.appendChild(card);
+        function renderFilters() {
+            const list = document.getElementById('filters-list');
+            const scrollPos = list.scrollTop; // Store current scroll position
+            list.innerHTML = '';
+            
+            filters.forEach((filter, index) => {
+                const card = document.createElement('div');
+                card.className = `filter-card ${currentFilter === filter ? 'active' : ''}`;
+                
+                // Use stopPropagation to prevent scroll reset
+                card.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setCurrentFilter(filter);
+                });
+                
+                card.innerHTML = `
+                    <div class="filter-preview" id="preview-${index}"></div>
+                    <div class="filter-name">${filter.name}</div>
+                    <div class="filter-code">${filter.code.split('\n')[0]}...</div>
+                    <button class="edit-button" onclick="event.stopPropagation(); editFilter(${index})">Edit</button>
+                `;
+                
+                list.appendChild(card);
 
-        // Create preview sketch
-        previewSketches[index] = createPreviewSketch(filter, document.getElementById(`preview-${index}`));
-    });
+                // Create preview sketch
+                previewSketches[index] = createPreviewSketch(filter, document.getElementById(`preview-${index}`));
+            });
+            
+            list.scrollTop = scrollPos; // Restore scroll position
+        }
 
-    // Restore scroll position
-    list.scrollTop = scrollPosition;
-}
-
-function setCurrentFilter(filter) {
-    const previousFilter = currentFilter;
-    currentFilter = filter;
-    
-    // Only re-render if filter actually changed
-    if (previousFilter !== currentFilter) {
-        const list = document.getElementById('filters-list');
-        const scrollPosition = list.scrollTop;
-        
-        renderFilters();
-        
-        // Restore scroll position
-        list.scrollTop = scrollPosition;
-    }
-}
-
+        function setCurrentFilter(filter) {
+            currentFilter = filter;
+            renderFilters();
+        }
 
         function showModal(isEdit = false, filterIndex = null) {
             const modal = document.getElementById('filter-modal');
             const nameInput = document.getElementById('filter-name');
             const codeInput = document.getElementById('filter-code');
+            const deleteButton = modal.querySelector('.delete');
 
             if (isEdit && filterIndex !== null) {
                 nameInput.value = filters[filterIndex].name;
                 codeInput.value = filters[filterIndex].code;
                 modal.setAttribute('data-edit-index', filterIndex);
+                deleteButton.style.display = 'block';
             } else {
                 nameInput.value = '';
                 codeInput.value = `// Use these variables in your code:
@@ -457,6 +469,7 @@ for (let i = 0; i < pixels.length; i += 4) {
     // pixels[i + 2] = pixels[i + 2];   // B
 }`;
                 modal.removeAttribute('data-edit-index');
+                deleteButton.style.display = 'none';
             }
 
             modal.style.display = 'block';
@@ -466,31 +479,39 @@ for (let i = 0; i < pixels.length; i += 4) {
             document.getElementById('filter-modal').style.display = 'none';
         }
 
-function saveFilter() {
-    const name = document.getElementById('filter-name').value;
-    const code = document.getElementById('filter-code').value;
-    const modal = document.getElementById('filter-modal');
-    const editIndex = modal.getAttribute('data-edit-index');
-    
-    const list = document.getElementById('filters-list');
-    const scrollPosition = list.scrollTop;
+        function saveFilter() {
+            const name = document.getElementById('filter-name').value;
+            const code = document.getElementById('filter-code').value;
+            const modal = document.getElementById('filter-modal');
+            const editIndex = modal.getAttribute('data-edit-index');
 
-    if (editIndex !== null) {
-        filters[editIndex] = { name, code };
-    } else {
-        filters.push({ name, code });
-    }
+            if (editIndex !== null) {
+                filters[editIndex] = { name, code };
+            } else {
+                filters.push({ name, code });
+            }
 
-    saveFilters();
-    renderFilters();
-    closeModal();
-    
-    // Restore scroll position
-    list.scrollTop = scrollPosition;
-}
+            saveFilters();
+            renderFilters();
+            closeModal();
+        }
+
+        function deleteFilter() {
+            const modal = document.getElementById('filter-modal');
+            const editIndex = modal.getAttribute('data-edit-index');
+            
+            if (editIndex !== null) {
+                if (currentFilter === filters[editIndex]) {
+                    currentFilter = null;
+                }
+                filters.splice(editIndex, 1);
+                saveFilters();
+                renderFilters();
+                closeModal();
+            }
+        }
 
         function editFilter(index) {
-            event.stopPropagation();
             showModal(true, index);
         }
 
@@ -523,51 +544,17 @@ function saveFilter() {
     pixels[i + 1] *= 0.7;
     pixels[i + 2] *= 0.7;
 }`
-            },
-            {
-                name: "Pixelate",
-                code: `let blockSize = 10;
-for (let y = 0; y < height; y += blockSize) {
-    for (let x = 0; x < width; x += blockSize) {
-        let index = (y * width + x) * 4;
-        let r = pixels[index];
-        let g = pixels[index + 1];
-        let b = pixels[index + 2];
-        
-        for (let dy = 0; dy < blockSize && y + dy < height; dy++) {
-            for (let dx = 0; dx < blockSize && x + dx < width; dx++) {
-                let i = ((y + dy) * width + (x + dx)) * 4;
-                pixels[i] = r;
-                pixels[i + 1] = g;
-                pixels[i + 2] = b;
-            }
-        }
-    }
-}`
-            },
-            {
-                name: "Threshold",
-                code: `let threshold = 127;
-for (let i = 0; i < pixels.length; i += 4) {
-    let avg = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
-    let val = avg > threshold ? 255 : 0;
-    pixels[i] = val;
-    pixels[i + 1] = val;
-    pixels[i + 2] = val;
-}`
             }
         ];
 
-// Then, initialize variables
-let currentFilter = null;
-let sharedCapture = null;
-let captureReady = false;
-let previewSketches = {};
+        // Initialize variables
+        let currentFilter = null;
+        let sharedCapture = null;
+        let captureReady = false;
+        let previewSketches = {};
 
-// Now initialize filters from localStorage or defaults
-let filters = JSON.parse(localStorage.getItem('filters')) || defaultFilters;
-
-        
+        // Initialize filters from localStorage or defaults
+        let filters = JSON.parse(localStorage.getItem('filters')) || defaultFilters;
     </script>
 </body>
 </html>

@@ -390,31 +390,48 @@ for (let i = 0; i < pixels.length; i += 4) {
             localStorage.setItem('filters', JSON.stringify(filters));
         }
 
-        function renderFilters() {
-            const list = document.getElementById('filters-list');
-            list.innerHTML = '';
-            
-            filters.forEach((filter, index) => {
-                const card = document.createElement('div');
-                card.className = `filter-card ${currentFilter === filter ? 'active' : ''}`;
-                card.innerHTML = `
-                    <div class="filter-preview" id="preview-${index}"></div>
-                    <div class="filter-name">${filter.name}</div>
-                    <div class="filter-code">${filter.code.split('\n')[0]}...</div>
-                    <button class="edit-button" onclick="editFilter(${index})">Edit</button>
-                `;
-                card.onclick = () => setCurrentFilter(filter);
-                list.appendChild(card);
+renderFilters() {
+    const list = document.getElementById('filters-list');
+    const scrollPosition = list.scrollTop; // Store current scroll position
+    
+    list.innerHTML = '';
+    
+    filters.forEach((filter, index) => {
+        const card = document.createElement('div');
+        card.className = `filter-card ${currentFilter === filter ? 'active' : ''}`;
+        card.innerHTML = `
+            <div class="filter-preview" id="preview-${index}"></div>
+            <div class="filter-name">${filter.name}</div>
+            <div class="filter-code">${filter.code.split('\n')[0]}...</div>
+            <button class="edit-button" onclick="editFilter(${index})">Edit</button>
+        `;
+        card.onclick = () => setCurrentFilter(filter);
+        list.appendChild(card);
 
-                // Create preview sketch
-                previewSketches[index] = createPreviewSketch(filter, document.getElementById(`preview-${index}`));
-            });
-        }
+        // Create preview sketch
+        previewSketches[index] = createPreviewSketch(filter, document.getElementById(`preview-${index}`));
+    });
 
-        function setCurrentFilter(filter) {
-            currentFilter = filter;
-            renderFilters();
-        }
+    // Restore scroll position
+    list.scrollTop = scrollPosition;
+}
+
+function setCurrentFilter(filter) {
+    const previousFilter = currentFilter;
+    currentFilter = filter;
+    
+    // Only re-render if filter actually changed
+    if (previousFilter !== currentFilter) {
+        const list = document.getElementById('filters-list');
+        const scrollPosition = list.scrollTop;
+        
+        renderFilters();
+        
+        // Restore scroll position
+        list.scrollTop = scrollPosition;
+    }
+}
+
 
         function showModal(isEdit = false, filterIndex = null) {
             const modal = document.getElementById('filter-modal');
@@ -449,22 +466,28 @@ for (let i = 0; i < pixels.length; i += 4) {
             document.getElementById('filter-modal').style.display = 'none';
         }
 
-        function saveFilter() {
-            const name = document.getElementById('filter-name').value;
-            const code = document.getElementById('filter-code').value;
-            const modal = document.getElementById('filter-modal');
-            const editIndex = modal.getAttribute('data-edit-index');
+function saveFilter() {
+    const name = document.getElementById('filter-name').value;
+    const code = document.getElementById('filter-code').value;
+    const modal = document.getElementById('filter-modal');
+    const editIndex = modal.getAttribute('data-edit-index');
+    
+    const list = document.getElementById('filters-list');
+    const scrollPosition = list.scrollTop;
 
-            if (editIndex !== null) {
-                filters[editIndex] = { name, code };
-            } else {
-                filters.push({ name, code });
-            }
+    if (editIndex !== null) {
+        filters[editIndex] = { name, code };
+    } else {
+        filters.push({ name, code });
+    }
 
-            saveFilters();
-            renderFilters();
-            closeModal();
-        }
+    saveFilters();
+    renderFilters();
+    closeModal();
+    
+    // Restore scroll position
+    list.scrollTop = scrollPosition;
+}
 
         function editFilter(index) {
             event.stopPropagation();
